@@ -18,20 +18,19 @@ const blendshapeNames = [
     "mouthUpperUpLeft", "mouthUpperUpRight", "noseSneerLeft", "noseSneerRight"
 ];
 
-export default function LiveVideo({ setUiTelemetry, setSoapNote}) {
+export default function LiveVideo({ setUiTelemetry, setSoapNote }) {
   const videoRef = useRef(null);
   const [isTracking, setIsTracking] = useState(false);
   const emotionInterval = useRef(null);
   const audioInterval = useRef(null);
   const [patientLang, setPatientLang] = useState('hi-IN'); 
+  const [liveTranscriptUI, setLiveTranscriptUI] = useState(""); // <-- Added state for the UI
 
-  
   const latestVolume = useRef(0.0);
   const latestPitch = useRef(0.0);
   const latestTranscript = useRef("");
   const lastFirebaseLogTime = useRef(Date.now());
   
- 
   const trackingActiveRef = useRef(false);
   const recognitionRef = useRef(null);
 
@@ -126,18 +125,18 @@ export default function LiveVideo({ setUiTelemetry, setSoapNote}) {
 
         const recognition = new SpeechRecognition();
         recognition.continuous = true;
-        recognition.interimResults = false;
+        recognition.interimResults = false; // Note: Setting to true allows words to appear as you speak, but false is fine for complete phrases.
         recognition.lang = patientLang;
 
         recognition.onresult = (event) => {
             const currentTranscript = event.results[event.results.length - 1][0].transcript;
             if (currentTranscript.trim() !== '') {
                 latestTranscript.current = `(${patientLang}): ${currentTranscript}`;
+                setLiveTranscriptUI(currentTranscript); // <-- Added this to update the UI
             }
         };
 
         recognition.onend = () => {
-           
             if (trackingActiveRef.current && recognitionRef.current) {
                 try { recognitionRef.current.start(); } catch (e) {}
             }
@@ -252,13 +251,12 @@ export default function LiveVideo({ setUiTelemetry, setSoapNote}) {
 
   const [isGenerating, setIsGenerating] = useState(false);
 
-const endCall = async () => {
+  const endCall = async () => {
     setIsGenerating(true);
     trackingActiveRef.current = false; 
     console.log("Ending call. Triggering backend SOAP generation...");
     
     try {
-      
       const response = await fetch('/api/generate-soap', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -286,6 +284,32 @@ const endCall = async () => {
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <div ref={videoRef} style={{ width: '100%', height: '100%', backgroundColor: '#000', borderRadius: '6px', overflow: 'hidden' }} />
       
+      {/* --- Added Live Transcription Overlay --- */}
+      {isTracking && (
+        <div style={{
+          position: 'absolute',
+          bottom: '50px',
+          left: '10px',
+          right: '10px',
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          padding: '10px 15px',
+          borderRadius: '8px',
+          color: 'white',
+          zIndex: 10,
+          display: 'flex',
+          flexDirection: 'column',
+          border: '1px solid #374151',
+          backdropFilter: 'blur(4px)'
+        }}>
+          <span style={{ fontSize: '12px', color: '#10b981', fontWeight: 'bold', marginBottom: '4px' }}>
+            🎤 Live Transcript
+          </span>
+          <span style={{ fontSize: '14px', fontStyle: liveTranscriptUI ? 'normal' : 'italic', color: liveTranscriptUI ? '#fff' : '#9ca3af' }}>
+            {liveTranscriptUI || "Listening to patient..."}
+          </span>
+        </div>
+      )}
+
       <div style={{ position: 'absolute', bottom: 10, left: 10, zIndex: 10 }}>
         <select 
           value={patientLang} 
