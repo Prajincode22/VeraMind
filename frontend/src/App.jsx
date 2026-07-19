@@ -14,8 +14,8 @@ function App() {
   return (
     <div style={styles.container}>
       <header style={styles.header}>
-        <h1>Telehealth AI Platform — Doctor HUD</h1>
-        <p style={styles.status}>🟢 Online - Local Tri-Modal AI Active</p>
+        <h1>VeraMind-AI Platform  Doctor HUD</h1>
+        <p style={styles.status}>🟢 Online </p>
       </header>
 
       <main style={styles.grid}>
