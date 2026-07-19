@@ -25,13 +25,13 @@ export default function LiveVideo({ setUiTelemetry, setSoapNote}) {
   const audioInterval = useRef(null);
   const [patientLang, setPatientLang] = useState('hi-IN'); 
 
-  // Local storage for sensor fusion without needing a backend
+  
   const latestVolume = useRef(0.0);
   const latestPitch = useRef(0.0);
   const latestTranscript = useRef("");
   const lastFirebaseLogTime = useRef(Date.now());
   
-  // Keep mutable references for the runtime tracking states to prevent event stale closure issues
+ 
   const trackingActiveRef = useRef(false);
   const recognitionRef = useRef(null);
 
@@ -137,7 +137,7 @@ export default function LiveVideo({ setUiTelemetry, setSoapNote}) {
         };
 
         recognition.onend = () => {
-            // Check reference status instead of stale state closure snapshot
+           
             if (trackingActiveRef.current && recognitionRef.current) {
                 try { recognitionRef.current.start(); } catch (e) {}
             }
@@ -148,7 +148,7 @@ export default function LiveVideo({ setUiTelemetry, setSoapNote}) {
     };
 
     const predictWebcam = (videoElement) => {
-      // Break animation recursive execution loop entirely if tracking ends
+      
       if (!trackingActiveRef.current) return;
 
       if (faceLandmarker) {
@@ -194,7 +194,7 @@ export default function LiveVideo({ setUiTelemetry, setSoapNote}) {
                     note = `CRITICAL: ${note} Accompanied by loud/strained vocalizations.`;
                 }
 
-                // Send data up to App.jsx to update the screen BEFORE clearing the transcript
+                // Sending UI Telemetry 
                 if (setUiTelemetry) {
                     setUiTelemetry({
                         vocal_stress_level: status,
@@ -258,7 +258,7 @@ const endCall = async () => {
     console.log("Ending call. Triggering backend SOAP generation...");
     
     try {
-      // SECURE: We no longer fetch Gemini directly. We fetch OUR backend proxy.
+      
       const response = await fetch('/api/generate-soap', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
