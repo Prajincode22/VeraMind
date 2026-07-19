@@ -1,8 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore, collection, getDocs, doc, setDoc } from "firebase/firestore";
 
-// SECURITY: Use environment variables, not hardcoded strings!
 const firebaseConfig = {
   apiKey: process.env.VITE_FIREBASE_API_KEY,
   authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -12,10 +11,10 @@ const firebaseConfig = {
   appId: process.env.VITE_FIREBASE_APP_ID
 };
 
-const app = initializeApp(firebaseConfig);
+// FIX 1: Prevent Vercel crash loop
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 
-// Use server-side secure env variable
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 export default async function handler(req, res) {
@@ -49,6 +48,11 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ success: true, soap_note: soapNote });
   } catch (error) {
-    return res.status(500).json({ error: "Failed to generate SOAP note" });
+    console.error("CRITICAL BACKEND ERROR:", error);
+    // FIX 2: Send the actual Gemini error back to the browser
+    return res.status(500).json({ 
+        error: "Failed to generate SOAP note", 
+        details: error.message 
+    });
   }
 }
