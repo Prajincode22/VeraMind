@@ -3,10 +3,15 @@
 
 export function score(input) {
     const raw_prediction = compute_score(input);
-    if (raw_prediction === 0) return "Normal";
-    if (raw_prediction === 1) return "Frustrated";
-    if (raw_prediction === 2) return "Lethargic";
-    return "Normal";
+    
+    // Find the index of the highest score (the 1.0) in the array
+    const maxIndex = raw_prediction.indexOf(Math.max(...raw_prediction));
+    
+    if (maxIndex === 0) return "Normal";
+    if (maxIndex === 1) return "Frustrated";
+    if (maxIndex === 2) return "Lethargic";
+    
+    return "Normal"; // Fallback just in case
 }
 
 function compute_score(input) {
