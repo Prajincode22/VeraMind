@@ -35,7 +35,7 @@ export default async function handler(req, res) {
 
     if (logsList.length === 0) return res.status(200).json({ success: true, soap_note: "No data to summarize." });
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash" });
     const prompt = `Review this medical telemetry: ${logsList.join('\n')}. Provide a formal SOAP note.`;
     
     const result = await model.generateContent(prompt);
