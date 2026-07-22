@@ -204,7 +204,7 @@ const [currentSessionId] = useState(`SESS-${Date.now()}`);
                     });
                 }
 
-                const telemetryRef = collection(db, `sessions/${currentSession}/telemetry`);
+                //const telemetryRef = collection(db, `sessions/${currentSession}/telemetry`);
                 addDoc(telemetryRef, {
                     timestamp: new Date().toISOString(),
                     status: status,
