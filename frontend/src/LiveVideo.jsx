@@ -24,7 +24,9 @@ export default function LiveVideo({ setUiTelemetry, setSoapNote }) {
   const emotionInterval = useRef(null);
   const audioInterval = useRef(null);
   const [patientLang, setPatientLang] = useState('hi-IN'); 
-  const [liveTranscriptUI, setLiveTranscriptUI] = useState(""); // <-- Added state for the UI
+  const [liveTranscriptUI, setLiveTranscriptUI] = useState("");
+ 
+const [currentSessionId] = useState(`SESS-${Date.now()}`);
 
   const latestVolume = useRef(0.0);
   const latestPitch = useRef(0.0);
@@ -164,7 +166,7 @@ export default function LiveVideo({ setUiTelemetry, setSoapNote }) {
             });
 
             if (now - lastFirebaseLogTime.current > 1500) {
-                const currentSession = "SESS-LIVE-001"; 
+                const telemetryRef = collection(db, `sessions/${currentSessionId}/telemetry`);
                 const inputArray = blendshapeNames.map(name => facialData[name] || 0.0);
                 
                 let prediction;
@@ -260,7 +262,7 @@ export default function LiveVideo({ setUiTelemetry, setSoapNote }) {
       const response = await fetch('/api/generate-soap', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: "SESS-LIVE-001" }) 
+        body: JSON.stringify({ sessionId: "currentSessionId" }) 
       });
 
       const data = await response.json();
